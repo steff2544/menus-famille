@@ -1,0 +1,704 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Générateur de menus familiaux</title>
+  <style>
+    :root {
+      --bg: #F7F4EE;
+      --card: #FFFFFF;
+      --ink: #252018;
+      --muted: #6C6255;
+      --green: #2F3A2F;
+      --green-dark: #243024;
+      --border: #DED6C8;
+      --soft: #EFE8DB;
+      --chip: #F7F4EE;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .wrap {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+    header {
+      background: var(--green);
+      color: white;
+      border-radius: 28px;
+      padding: 26px;
+      box-shadow: 0 8px 22px rgba(0,0,0,.08);
+    }
+    .eyebrow {
+      margin: 0 0 10px;
+      text-transform: uppercase;
+      letter-spacing: .22em;
+      color: #D8E3D2;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2rem, 5vw, 4rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    header p.desc {
+      max-width: 880px;
+      color: #EEF4E9;
+      font-size: 17px;
+      margin: 16px 0 0;
+    }
+    .rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 22px;
+    }
+    .rule {
+      background: rgba(255,255,255,.11);
+      border-radius: 18px;
+      padding: 14px;
+      font-size: 14px;
+    }
+    .profiles, .controls, .grid, .bottom, .ingredient-box {
+      margin-top: 18px;
+    }
+    .profiles {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+    }
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+    .profile {
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--ink);
+      border-radius: 20px;
+      padding: 15px;
+      text-align: left;
+      box-shadow: 0 4px 14px rgba(0,0,0,.04);
+      min-height: 116px;
+    }
+    .profile.active {
+      background: var(--green);
+      color: white;
+      border-color: var(--green);
+    }
+    .profile strong {
+      display: block;
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .profile span {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .profile.active span { color: #EEF4E9; }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .primary, .secondary {
+      border-radius: 18px;
+      padding: 12px 16px;
+      font-weight: 800;
+    }
+    .primary {
+      border: 1px solid var(--green);
+      background: var(--green);
+      color: white;
+    }
+    .primary:hover { background: var(--green-dark); }
+    .secondary {
+      border: 1px solid #CFC5B6;
+      background: white;
+      color: var(--ink);
+    }
+    .secondary:hover { background: var(--soft); }
+    .ingredient-box, .breakfasts, .panel, footer {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 18px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.035);
+    }
+    .ingredient-box h2, .breakfasts h2, .bottom h2, footer h2 {
+      margin: 0 0 12px;
+      font-size: 22px;
+      letter-spacing: -0.02em;
+    }
+    .ingredient-box p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .ingredient-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .ingredient-row input {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid #CFC5B6;
+      background: var(--bg);
+      border-radius: 18px;
+      padding: 12px 14px;
+      font: inherit;
+      outline: none;
+    }
+    .ingredient-row input:focus { border-color: var(--green); }
+    .ideas {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+    .idea {
+      background: var(--chip);
+      border-radius: 18px;
+      padding: 14px;
+      font-size: 14px;
+      font-weight: 750;
+    }
+    .breakfasts { display: none; }
+    .breakfast-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+    .small-card {
+      background: var(--chip);
+      border-radius: 18px;
+      padding: 14px;
+      font-size: 14px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+    }
+    .day {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      overflow: hidden;
+      min-height: 100%;
+      box-shadow: 0 4px 14px rgba(0,0,0,.035);
+      display: flex;
+      flex-direction: column;
+    }
+    .day-head {
+      background: var(--green);
+      color: white;
+      padding: 14px;
+    }
+    .day-head h2 {
+      margin: 0;
+      font-size: 20px;
+    }
+    .day-head p {
+      margin: 4px 0 0;
+      color: #D8E3D2;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .17em;
+      font-weight: 800;
+    }
+    .day-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      flex: 1;
+    }
+    .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .16em;
+      color: #807568;
+      font-weight: 900;
+      margin: 0 0 4px;
+    }
+    .day p { margin: 0; }
+    .dish {
+      font-weight: 800;
+      line-height: 1.25;
+    }
+    .details {
+      border-top: 1px solid #E7DFD2;
+      padding-top: 12px;
+      font-size: 12px;
+      color: #4E463C;
+    }
+    .details p { margin: 0 0 7px; }
+    .note {
+      margin-top: auto !important;
+      background: var(--chip);
+      border-radius: 16px;
+      padding: 12px;
+      font-size: 12px;
+      color: #5B5147;
+    }
+    .bottom {
+      display: grid;
+      grid-template-columns: .85fr 1.15fr;
+      gap: 12px;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .chip {
+      background: var(--chip);
+      border: 1px solid #D3C8B8;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+    .adjust {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+    footer { margin-top: 18px; }
+    footer p, .hint {
+      color: var(--muted);
+      margin: 0;
+    }
+    .hide { display: none; }
+    @media (max-width: 1100px) {
+      .grid { grid-template-columns: repeat(2, 1fr); }
+      .profiles { grid-template-columns: repeat(2, 1fr); }
+      .bottom { grid-template-columns: 1fr; }
+      .rules, .breakfast-grid, .adjust, .ideas { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .wrap { padding: 12px; }
+      header { border-radius: 22px; padding: 20px; }
+      .grid, .profiles { grid-template-columns: 1fr; }
+      .profile { min-height: auto; }
+      .primary, .secondary { width: 100%; }
+      .ingredient-row { flex-direction: column; }
+    }
+    @media print {
+      .controls, .profiles, .ingredient-box { display: none; }
+      body { background: white; }
+      header, .day-head { background: #2F3A2F !important; color: white !important; print-color-adjust: exact; }
+      .wrap { max-width: none; }
+      .grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <p class="eyebrow">Outil familial</p>
+      <h1>Générateur de menus</h1>
+      <p class="desc">Une semaine de repas pour 5 personnes, pensée pour réduire la charge mentale, garder un féculent le soir et préserver une logique HDL+ sans rigidité inutile.</p>
+      <div class="rules">
+        <div class="rule">Dîner = protéine + féculent + légume.</div>
+        <div class="rule">Repas du soir volontairement simples.</div>
+        <div class="rule">Objectif : décider moins, manger mieux.</div>
+      </div>
+    </header>
+
+    <section class="profiles" id="profiles"></section>
+
+    <section class="controls">
+      <button class="primary" onclick="generateOtherWeek()">Générer une autre semaine</button>
+      <button class="secondary" onclick="toggleLunch()" id="lunchBtn">Masquer les midis</button>
+      <button class="secondary" onclick="toggleBreakfast()" id="breakfastBtn">Afficher les petits-déjeuners</button>
+      <button class="secondary" onclick="window.print()">Imprimer / PDF</button>
+    </section>
+
+    <section class="ingredient-box">
+      <h2>J’ai un ingrédient à utiliser</h2>
+      <p>Tape un ingrédient du frigo : poulet, viande blanche, riz, pâtes, courgettes, œufs, poisson, tofu...</p>
+      <div class="ingredient-row">
+        <input id="ingredientInput" type="text" placeholder="Exemple : viande blanche" oninput="renderIngredientIdeas()" />
+        <button class="secondary" onclick="clearIngredient()">Effacer</button>
+      </div>
+      <div class="ideas" id="ingredientIdeas"></div>
+    </section>
+
+    <section class="breakfasts" id="breakfasts">
+      <h2>Petits-déjeuners repères</h2>
+      <div class="breakfast-grid" id="breakfastGrid"></div>
+    </section>
+
+    <main class="grid" id="menuGrid"></main>
+
+    <section class="bottom">
+      <div class="panel">
+        <h2>Liste de courses</h2>
+        <div class="chips" id="shoppingList"></div>
+        <p class="hint" style="margin-top:14px;">À compléter selon les stocks : fruits, skyr ou fromage blanc, pain complet, graines, huile d’olive, chocolat noir, condiments, produits plaisir raisonnés.</p>
+      </div>
+
+      <div class="panel">
+        <h2>Ajustements famille</h2>
+        <div class="adjust">
+          <div class="small-card"><strong>Gros appétits</strong><br><br>Augmenter le féculent avant d’ajouter du grignotage.</div>
+          <div class="small-card"><strong>Erin</strong><br><br>Servir séparément. Base douce. Pas de mélange imposé.</div>
+          <div class="small-card"><strong>HDL+</strong><br><br>Ajouter fibres, graines, légumineuses et protéines visibles.</div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <h2>Règle de survie mentale</h2>
+      <p>Quand la journée explose, ne cherche pas une recette parfaite. Fais seulement : féculent déjà prêt, protéine visible, légume cru ou surgelé, sauce yaourt. C’est un vrai repas.</p>
+    </footer>
+  </div>
+
+<script>
+const ideesParIngredient = {
+  poulet: [
+    "Poulet, pâtes, haricots verts",
+    "Poulet, riz, courgettes",
+    "Poulet, pommes de terre rôties, carottes",
+    "Wraps poulet, crudités, sauce yaourt",
+    "Gratin de pâtes au poulet et brocolis",
+    "Poulet froid, salade, pain complet"
+  ],
+  "viande blanche": [
+    "Escalope de dinde, riz, haricots verts",
+    "Poulet, pâtes, courgettes",
+    "Dinde, pommes de terre vapeur, carottes",
+    "Wrap viande blanche, crudités, sauce yaourt",
+    "Émincé de volaille, semoule, légumes grillés",
+    "Volaille froide, salade composée, pain complet"
+  ],
+  dinde: [
+    "Dinde, riz, brocolis",
+    "Dinde, pâtes, haricots verts",
+    "Dinde, purée, salade",
+    "Wraps dinde, avocat, crudités"
+  ],
+  riz: [
+    "Poulet, riz, courgettes",
+    "Poisson, riz, brocolis",
+    "Œufs brouillés, riz, petits pois",
+    "Riz cantonais maison aux œufs",
+    "Burrito bowl : riz, haricots rouges, maïs"
+  ],
+  pates: [
+    "Poulet, pâtes, haricots verts",
+    "Pâtes, jambon ou tofu fumé, petits pois",
+    "Pâtes, thon, tomate, salade",
+    "Gratin de pâtes, poulet, brocolis"
+  ],
+  "pâtes": [
+    "Poulet, pâtes, haricots verts",
+    "Pâtes, jambon ou tofu fumé, petits pois",
+    "Pâtes, thon, tomate, salade",
+    "Gratin de pâtes, poulet, brocolis"
+  ],
+  courgettes: [
+    "Poulet, riz, courgettes",
+    "Omelette, pommes de terre, courgettes",
+    "Pâtes, courgettes, parmesan, œufs",
+    "Poisson, semoule, courgettes"
+  ],
+  carottes: [
+    "Steak haché, pommes de terre, carottes",
+    "Poulet, riz, carottes",
+    "Œufs, semoule, carottes râpées",
+    "Dahl lentilles corail, riz, carottes"
+  ],
+  oeufs: [
+    "Omelette, pommes de terre sautées, concombre",
+    "Œufs brouillés, riz, petits pois",
+    "Tortilla pommes de terre, salade",
+    "Œufs mollets, pâtes, haricots verts"
+  ],
+  "œufs": [
+    "Omelette, pommes de terre sautées, concombre",
+    "Œufs brouillés, riz, petits pois",
+    "Tortilla pommes de terre, salade",
+    "Œufs mollets, pâtes, haricots verts"
+  ],
+  poisson: [
+    "Poisson, riz, brocolis",
+    "Poisson, pommes de terre vapeur, salade",
+    "Poisson pané, pâtes, haricots verts",
+    "Saumon, riz, courgettes"
+  ],
+  tofu: [
+    "Tofu fumé, pommes de terre, salade",
+    "Tofu doré, riz, brocolis",
+    "Wrap tofu, crudités, sauce yaourt",
+    "Pâtes, tofu fumé, courgettes"
+  ],
+  steak: [
+    "Steak haché, pommes de terre, carottes",
+    "Steak haché, pâtes, haricots verts",
+    "Steak haché, riz, salade",
+    "Burger maison simple, salade, pommes de terre"
+  ],
+  jambon: [
+    "Jambon, coquillettes, petits pois",
+    "Jambon, purée, salade",
+    "Croque complet, salade, crudités",
+    "Pâtes jambon, courgettes, fromage râpé"
+  ]
+};
+
+const jours = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+const profils = {
+  simple: { label: "Menus très simples", description: "Cuisine familiale ultra classique : viande ou poisson, féculent, légume." },
+  equilibre: { label: "Équilibré HDL+", description: "Repas simples, fibres, protéines visibles et féculents le soir." },
+  flemme: { label: "Flemme réaliste", description: "Peu de vaisselle, cuisson courte, assemblage rapide." },
+  budget: { label: "Budget serré", description: "Œufs, lentilles, pois chiches, riz, pâtes, légumes économiques." },
+  erin: { label: "Erin compatible", description: "Bases douces, aliments séparables, option sportive sans crash." },
+  proteines: { label: "Priorité protéines", description: "Dîners plus rassasiants pour éviter les faims tardives." }
+};
+
+const bases = {
+  simple: [
+    { type: "Classique", plat: "Poulet, pâtes, haricots verts", proteine: "poulet", feculent: "pâtes", legumes: "haricots verts", note: "Le vrai repas sans réflexion inutile." },
+    { type: "Four", plat: "Steak haché, pommes de terre rôties, carottes", proteine: "steak haché", feculent: "pommes de terre", legumes: "carottes", note: "Simple, efficace, très familial." },
+    { type: "Poisson", plat: "Poisson pané ou saumon, riz, brocolis", proteine: "poisson", feculent: "riz", legumes: "brocolis", note: "Base classique qui fonctionne presque toujours." },
+    { type: "Pasta", plat: "Jambon ou tofu fumé, coquillettes, petits pois", proteine: "jambon ou tofu fumé", feculent: "coquillettes", legumes: "petits pois", note: "Version régressive et rapide." },
+    { type: "Poêle", plat: "Saucisses ou végétal, purée, salade", proteine: "saucisses ou végétal", feculent: "purée", legumes: "salade", note: "Repas réconfort après grosse journée." },
+    { type: "Riz", plat: "Émincé de poulet, riz, courgettes", proteine: "poulet", feculent: "riz", legumes: "courgettes", note: "Très facile à préparer en quantité." },
+    { type: "Dimanche", plat: "Omelette, pommes de terre sautées, concombre", proteine: "œufs", feculent: "pommes de terre", legumes: "concombre", note: "Minimal mais vrai repas." }
+  ],
+  equilibre: [
+    { type: "Bowl", plat: "Bowl riz complet, tofu doré, carottes rôties, sauce skyr-citron, sésame", proteine: "tofu + skyr", feculent: "riz complet", legumes: "carottes", note: "Stable, rassasiant, très bon pour relancer la semaine." },
+    { type: "Four", plat: "Pommes de terre rôties, œufs mollets, brocolis, sauce yaourt moutarde", proteine: "œufs + yaourt", feculent: "pommes de terre", legumes: "brocolis", note: "Simple, économique, compatible grosse faim du soir." },
+    { type: "Pasta", plat: "Pâtes semi-complètes, lentilles corail tomate, parmesan, salade verte", proteine: "lentilles corail", feculent: "pâtes semi-complètes", legumes: "tomate + salade", note: "Remplace une bolognaise sans frustration." },
+    { type: "Wrap", plat: "Wraps complets, pois chiches rôtis, crudités, sauce tahini-citron", proteine: "pois chiches", feculent: "wrap complet", legumes: "crudités", note: "Chaque personne compose son assiette : moins de conflit familial." },
+    { type: "Plaisir", plat: "Pizza bio maison ou achetée, grande salade pois chiches-concombre, skyr en complément", proteine: "pois chiches + skyr", feculent: "pâte à pizza", legumes: "salade + concombre", note: "Repas plaisir, mais pas repas vide." },
+    { type: "Familial", plat: "Chili végétarien haricots rouges, riz, avocat, fromage râpé", proteine: "haricots rouges", feculent: "riz", legumes: "tomate + poivron", note: "Très bon pour les gros appétits." },
+    { type: "Prépa", plat: "Soupe épaisse lentilles-légumes, tartines complètes, œufs ou tofu fumé", proteine: "lentilles + œufs/tofu", feculent: "pain complet", legumes: "légumes de soupe", note: "Utile le dimanche : prépare aussi le lundi midi." }
+  ],
+  flemme: [
+    { type: "Assemblage", plat: "Semoule complète, pois chiches, légumes grillés surgelés, feta, huile d’olive", proteine: "pois chiches + feta", feculent: "semoule", legumes: "légumes grillés", note: "10 minutes. Zéro héroïsme." },
+    { type: "Four", plat: "Patates douces et pommes de terre au four, tofu fumé, salade verte", proteine: "tofu fumé", feculent: "pommes de terre", legumes: "salade", note: "Tout cuit seul." },
+    { type: "Pasta", plat: "Pâtes, thon ou lentilles, sauce tomate, parmesan, crudités", proteine: "thon ou lentilles", feculent: "pâtes", legumes: "tomate + crudités", note: "Version poisson ou végétarienne." },
+    { type: "Omelette", plat: "Omelette pommes de terre, épinards, fromage, salade", proteine: "œufs", feculent: "pommes de terre", legumes: "épinards", note: "Très efficace après journée lourde." },
+    { type: "Tartines", plat: "Tartines pain complet, houmous, œuf, avocat, soupe minute", proteine: "houmous + œuf", feculent: "pain complet", legumes: "soupe", note: "Repas de survie, mais propre." },
+    { type: "Wok", plat: "Riz, légumes wok surgelés, edamame ou poulet, sauce soja douce", proteine: "edamame ou poulet", feculent: "riz", legumes: "wok", note: "Très bon ratio simplicité/satiété." },
+    { type: "Restes", plat: "Grande assiette de restes : féculent + protéine + crudités + sauce yaourt", proteine: "reste disponible", feculent: "reste disponible", legumes: "crudités", note: "On ne cuisine pas : on assemble." }
+  ],
+  budget: [
+    { type: "Dahl", plat: "Dahl lentilles corail, riz, carottes, yaourt nature", proteine: "lentilles corail + yaourt", feculent: "riz", legumes: "carottes", note: "Excellent ratio budget/protéines." },
+    { type: "Œufs", plat: "Œufs brouillés, pommes de terre vapeur, salade de chou-carotte", proteine: "œufs", feculent: "pommes de terre", legumes: "chou + carotte", note: "Rustique, solide, pas cher." },
+    { type: "Pasta", plat: "Pâtes complètes, pois cassés ou lentilles, tomate, fromage râpé", proteine: "pois cassés/lentilles", feculent: "pâtes", legumes: "tomate", note: "À garder en stock permanent." },
+    { type: "Couscous", plat: "Couscous légumes, pois chiches, raisins secs à part", proteine: "pois chiches", feculent: "semoule", legumes: "légumes couscous", note: "Raisins à part pour Erin ou les envies sucrées." },
+    { type: "Riz", plat: "Riz cantonais maison aux œufs, petits pois, carottes", proteine: "œufs", feculent: "riz", legumes: "petits pois + carottes", note: "Recycle parfaitement le riz de la veille." },
+    { type: "Haricots", plat: "Haricots rouges tomate, riz, yaourt citronné", proteine: "haricots rouges", feculent: "riz", legumes: "tomate", note: "Très rassasiant." },
+    { type: "Soupe", plat: "Soupe lentilles vertes, pain complet, fromage blanc herbes", proteine: "lentilles + fromage blanc", feculent: "pain complet", legumes: "légumes de soupe", note: "Très compatible HDL+." }
+  ],
+  erin: [
+    { type: "Base douce", plat: "Pâtes semi-complètes, sauce tomate douce, poulet ou tofu croustillant, parmesan", proteine: "poulet ou tofu", feculent: "pâtes", legumes: "tomate", note: "Base simple, protéine visible, pas de mélange imposé." },
+    { type: "Wrap", plat: "Wraps complets à composer : œuf, poulet/tofu, avocat, crudités à part", proteine: "œuf + poulet/tofu", feculent: "wrap complet", legumes: "crudités à part", note: "Chacun compose. On évite le bras de fer." },
+    { type: "Sport", plat: "Riz, boulettes végétales ou poulet, carottes, sauce yaourt douce", proteine: "boulettes/poulet", feculent: "riz", legumes: "carottes", note: "Bon avant ou après handball." },
+    { type: "Sucré contrôlé", plat: "Pancakes salés/sucrés complets : œufs, farine semi-complète, skyr, fruit à côté", proteine: "œufs + skyr", feculent: "farine semi-complète", legumes: "crudités en option", note: "Canalise l’envie sucrée sans crash massif." },
+    { type: "Pizza maîtrisée", plat: "Pizza bio + jambon sans nitrites ou tofu fumé + salade/protéine à côté", proteine: "jambon/tofu + skyr", feculent: "pâte à pizza", legumes: "salade à côté", note: "On ne diabolise pas, on complète." },
+    { type: "Bol séparé", plat: "Bol pommes de terre, œufs, fromage, concombre/carottes à part", proteine: "œufs + fromage", feculent: "pommes de terre", legumes: "crudités à part", note: "Séparation des aliments = stratégie utile." },
+    { type: "Dimanche", plat: "Croque complet maison, soupe douce, skyr fruité maison", proteine: "fromage + skyr", feculent: "pain complet", legumes: "soupe", note: "Repas réconfort, mais cadré." }
+  ],
+  proteines: [
+    { type: "Tofu", plat: "Riz complet, tofu mariné, brocolis, sauce skyr soja-citron", proteine: "tofu + skyr", feculent: "riz complet", legumes: "brocolis", note: "Très bonne densité protéique végétarienne." },
+    { type: "Œufs", plat: "Tortilla pommes de terre-épinards, salade, fromage blanc", proteine: "œufs + fromage blanc", feculent: "pommes de terre", legumes: "épinards", note: "Repas simple et solide." },
+    { type: "Poulet", plat: "Poulet, semoule complète, ratatouille, yaourt citronné", proteine: "poulet + yaourt", feculent: "semoule", legumes: "ratatouille", note: "Option flexitarienne efficace." },
+    { type: "Lentilles", plat: "Lentilles vertes, riz, carottes, œuf mollet", proteine: "lentilles + œuf", feculent: "riz", legumes: "carottes", note: "Association très rassasiante." },
+    { type: "Poisson", plat: "Pommes de terre vapeur, sardines ou maquereau, salade croquante", proteine: "sardines/maquereau", feculent: "pommes de terre", legumes: "salade", note: "Très bon HDL+, si accepté par la famille." },
+    { type: "Haricots", plat: "Burrito bowl : riz, haricots rouges, maïs, avocat, skyr épicé", proteine: "haricots + skyr", feculent: "riz", legumes: "maïs + avocat", note: "Très nourrissant." },
+    { type: "Récup", plat: "Soupe pois cassés, tartines complètes, tofu fumé ou œufs", proteine: "pois cassés + tofu/œufs", feculent: "pain complet", legumes: "légumes de soupe", note: "Très bien après marche ou journée dense." }
+  ]
+};
+
+const midis = [
+  "Restes du dîner + crudités + fruit",
+  "Salade complète : féculent + légumineuse + légumes + graines",
+  "Wrap complet froid avec houmous, œuf ou tofu",
+  "Bowl riz/lentilles/légumes + yaourt nature",
+  "Soupe épaisse + tartine protéinée + fruit",
+  "Assiette rapide : pain complet, œufs, avocat, crudités",
+  "Pâtes froides semi-complètes, pois chiches, légumes, feta"
+];
+
+const petitsDej = [
+  "Stéphanie : skyr, demi-pomme, raisins, chia/sésame, pain + purée d’amandes, café cannelle",
+  "Erin : skyr cacao peu sucré + fruit + tartine purée d’amandes",
+  "Enfants faim forte : œufs + pain complet + fruit",
+  "Option sport : skyr + banane + graines + pain complet"
+];
+
+let currentProfile = "simple";
+let tour = 0;
+let showLunch = true;
+let showBreakfast = false;
+
+function rotateArray(array, offset) {
+  return array.map((_, index) => array[(index + offset) % array.length]);
+}
+
+function buildShoppingList(menu) {
+  const items = new Set();
+  menu.forEach((m) => {
+    m.proteine.split("+").forEach(x => items.add(x.trim()));
+    m.feculent.split("+").forEach(x => items.add(x.trim()));
+    m.legumes.split("+").forEach(x => items.add(x.trim()));
+  });
+  return Array.from(items).filter(Boolean).sort((a,b) => a.localeCompare(b));
+}
+
+function getIngredientIdeas(value) {
+  const recherche = value.trim().toLowerCase();
+  if (!recherche) return [];
+  const trouve = Object.entries(ideesParIngredient).find(([cle]) => recherche.includes(cle) || cle.includes(recherche));
+  if (trouve) return trouve[1];
+  return [
+    `${value}, pâtes, légume vert`,
+    `${value}, riz, carottes ou courgettes`,
+    `${value}, pommes de terre, salade`,
+    `${value}, wrap complet, crudités`
+  ];
+}
+
+function renderIngredientIdeas() {
+  const input = document.getElementById("ingredientInput");
+  const root = document.getElementById("ingredientIdeas");
+  const ideas = getIngredientIdeas(input.value);
+  root.innerHTML = "";
+  ideas.forEach(idee => {
+    const div = document.createElement("div");
+    div.className = "idea";
+    div.textContent = idee;
+    root.appendChild(div);
+  });
+}
+
+function clearIngredient() {
+  document.getElementById("ingredientInput").value = "";
+  renderIngredientIdeas();
+}
+
+function renderProfiles() {
+  const root = document.getElementById("profiles");
+  root.innerHTML = "";
+  Object.entries(profils).forEach(([key, value]) => {
+    const btn = document.createElement("button");
+    btn.className = "profile" + (key === currentProfile ? " active" : "");
+    btn.innerHTML = `<strong>${value.label}</strong><span>${value.description}</span>`;
+    btn.onclick = () => { currentProfile = key; renderAll(); };
+    root.appendChild(btn);
+  });
+}
+
+function renderBreakfasts() {
+  const section = document.getElementById("breakfasts");
+  const grid = document.getElementById("breakfastGrid");
+  section.style.display = showBreakfast ? "block" : "none";
+  grid.innerHTML = "";
+  petitsDej.forEach(item => {
+    const div = document.createElement("div");
+    div.className = "small-card";
+    div.textContent = item;
+    grid.appendChild(div);
+  });
+  document.getElementById("breakfastBtn").textContent = showBreakfast ? "Masquer les petits-déjeuners" : "Afficher les petits-déjeuners";
+}
+
+function getMenu() {
+  const source = rotateArray(bases[currentProfile], tour % bases[currentProfile].length);
+  return jours.map((jour, index) => ({
+    jour,
+    ...source[index],
+    midi: midis[(index + tour) % midis.length]
+  }));
+}
+
+function renderMenu() {
+  const menu = getMenu();
+  const root = document.getElementById("menuGrid");
+  root.innerHTML = "";
+  menu.forEach(repas => {
+    const article = document.createElement("article");
+    article.className = "day";
+    article.innerHTML = `
+      <div class="day-head">
+        <h2>${repas.jour}</h2>
+        <p>${repas.type}</p>
+      </div>
+      <div class="day-body">
+        <div class="${showLunch ? "" : "hide"}">
+          <p class="label">Midi</p>
+          <p>${repas.midi}</p>
+        </div>
+        <div>
+          <p class="label">Soir</p>
+          <p class="dish">${repas.plat}</p>
+        </div>
+        <div class="details">
+          <p><strong>Protéine :</strong> ${repas.proteine}</p>
+          <p><strong>Féculent :</strong> ${repas.feculent}</p>
+          <p><strong>Légume :</strong> ${repas.legumes}</p>
+        </div>
+        <p class="note">${repas.note}</p>
+      </div>
+    `;
+    root.appendChild(article);
+  });
+  document.getElementById("lunchBtn").textContent = showLunch ? "Masquer les midis" : "Afficher les midis";
+}
+
+function renderShopping() {
+  const list = buildShoppingList(getMenu());
+  const root = document.getElementById("shoppingList");
+  root.innerHTML = "";
+  list.forEach(item => {
+    const span = document.createElement("span");
+    span.className = "chip";
+    span.textContent = item;
+    root.appendChild(span);
+  });
+}
+
+function renderAll() {
+  renderProfiles();
+  renderBreakfasts();
+  renderMenu();
+  renderShopping();
+  renderIngredientIdeas();
+}
+
+function generateOtherWeek() {
+  tour += 1;
+  renderAll();
+}
+
+function toggleLunch() {
+  showLunch = !showLunch;
+  renderAll();
+}
+
+function toggleBreakfast() {
+  showBreakfast = !showBreakfast;
+  renderAll();
+}
+
+renderAll();
+</script>
+</body>
+</html>
